@@ -250,7 +250,7 @@ export function getFileToCompile({ fullPath, filePath }: { fullPath: string; fil
     const baseName = path.basename(filePath, '.ts');
     return {
         inputPath: filePath,
-        outputPath: path.join(fullPath, '/dist/', `${baseName}.js`),
+        outputPath: path.join(fullPath, 'dist', `${baseName}.js`),
         baseName
     };
 }
@@ -295,7 +295,7 @@ export function listFilesToCompile({
 
         files = [path.join(fullPath, scriptDirectory || '', `${scriptName}.ts`)];
     } else {
-        files = glob.sync(`${fullPath}/*.ts`);
+        files = getMatchingFiles(fullPath, 'ts');
 
         // models.ts is the one expected file
         if (files.length === 1 && debug) {
@@ -309,19 +309,19 @@ export function listFilesToCompile({
 
             files = [
                 ...files,
-                ...glob.sync(`${fullPath}/${syncPath}/*.ts`),
-                ...glob.sync(`${fullPath}/${actionPath}/*.ts`),
-                ...glob.sync(`${fullPath}/${postConnectionPath}/*.ts`)
+                ...getMatchingFiles(fullPath, syncPath, 'ts'),
+                ...getMatchingFiles(fullPath, actionPath, 'ts'),
+                ...getMatchingFiles(fullPath, postConnectionPath, 'ts')
             ];
 
             if (debug) {
-                if (glob.sync(`${fullPath}/${syncPath}/*.ts`).length > 0) {
+                if (getMatchingFiles(fullPath, syncPath, 'ts').length > 0) {
                     printDebug(`Found nested sync files in ${syncPath}`);
                 }
-                if (glob.sync(`${fullPath}/${actionPath}/*.ts`).length > 0) {
+                if (getMatchingFiles(fullPath, actionPath, 'ts').length > 0) {
                     printDebug(`Found nested action files in ${actionPath}`);
                 }
-                if (glob.sync(`${fullPath}/${postConnectionPath}/*.ts`).length > 0) {
+                if (getMatchingFiles(fullPath, postConnectionPath, 'ts').length > 0) {
                     printDebug(`Found nested post connection script files in ${postConnectionPath}`);
                 }
             }
@@ -331,4 +331,13 @@ export function listFilesToCompile({
     return files.map((filePath) => {
         return getFileToCompile({ fullPath, filePath });
     });
+}
+
+// get array of posix file paths that match the given path parts.
+// last part is treated as a file extension.
+// eg getMatchingFiles('foo', 'ts') -> glob.sync('foo/*.ts')
+function getMatchingFiles(...args: string[]): string[] {
+    args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
+    const pattern = args.join('/');
+    return glob.sync(pattern, { posix: true });
 }
