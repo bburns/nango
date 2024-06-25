@@ -238,6 +238,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     }
 
     watcher.on('add', async (filePath: string) => {
+        filePath = filePath.replace(/\\/g, '/');
         if (filePath === nangoConfigFile) {
             return;
         }
@@ -245,6 +246,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     });
 
     watcher.on('unlink', (filePath: string) => {
+        filePath = filePath.replace(/\\/g, '/');
         if (filePath === nangoConfigFile) {
             return;
         }
@@ -261,6 +263,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     });
 
     watcher.on('change', async (filePath: string) => {
+        filePath = filePath.replace(/\\/g, '/');
         if (filePath === nangoConfigFile) {
             await compileAllFiles({ fullPath, debug });
             return;
