@@ -153,7 +153,8 @@ export function fieldToTypescript({ field }: { field: NangoModelField }): string
  */
 export function generateSDKTypes() {
     const filePath = resolve('@nangohq/shared/dist/sdk/sync.d.ts', import.meta.url);
-    const typesContent = fs.readFileSync(filePath.replace('file://', ''), 'utf8');
+    const url = new URL(filePath);
+    const typesContent = fs.readFileSync(url, 'utf8');
 
     return `
 ${typesContent}

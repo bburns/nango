@@ -1,5 +1,6 @@
 import { expect, describe, it, afterEach, vi } from 'vitest';
 import path from 'node:path';
+import os from 'node:os';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import stripAnsi from 'strip-ansi';
@@ -12,7 +13,8 @@ import { copyDirectoryAndContents, removeVersion } from './tests/helpers.js';
 import { parse } from './services/config.service.js';
 
 function getTestDirectory(name: string) {
-    const dir = `/tmp/${name}/nango-integrations/`;
+    const tmpdir = os.tmpdir();
+    const dir = path.join(tmpdir, name, 'nango-integrations');
     fs.mkdirSync(dir, { recursive: true });
     fs.rmSync(dir, { recursive: true, force: true });
     return dir;
@@ -480,7 +482,7 @@ describe('generate function tests', () => {
 
         const success = await compileAllFiles({ fullPath: dir, debug: false });
 
-        const module = await import(`${dir}dist/issues-github.js`);
+        const module = await import(`${dir}/dist/issues-github.js`);
 
         const result = module.default.default();
         expect(result).toBe('Hello, world!');
