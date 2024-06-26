@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 
 export const fixturesPath = path.join(__dirname, '..', '..', 'fixtures');
 
@@ -25,7 +26,9 @@ export function removeVersion(res: string) {
 }
 
 export async function getTestDirectory(name: string) {
-    const dir = `/tmp/${name}/nango-integrations/`;
+    // const dir = `/tmp/${name}/nango-integrations/`;
+    const tmpdir = os.tmpdir();
+    const dir = path.join(tmpdir, name, 'nango-integrations');
     await fs.mkdir(dir, { recursive: true });
     await fs.rm(dir, { recursive: true, force: true });
     return dir;

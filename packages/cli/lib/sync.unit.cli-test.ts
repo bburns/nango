@@ -472,7 +472,7 @@ describe('generate function tests', () => {
 
         const success = await compileAllFiles({ fullPath: dir, debug: false });
 
-        const module = await import(`${dir}dist/issues-github.js`);
+        const module = await import(`${dir}/dist/issues-github.js`);
 
         const result = module.default.default();
         expect(result).toBe('Hello, world!');
