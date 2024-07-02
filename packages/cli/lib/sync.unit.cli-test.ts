@@ -445,12 +445,16 @@ describe('generate function tests', () => {
         const dir = getTestDirectory('nested');
         init({ absolutePath: dir });
 
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/nested-integrations/hubspot`, `${dir}/hubspot`);
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/nested-integrations/github`, `${dir}/github`);
-        await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/nested-integrations/nango.yaml`, `${dir}/nango.yaml`);
+        // await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/nested-integrations/hubspot`, `${dir}/hubspot`);
+        await copyDirectoryAndContents(path.join(fixturesPath, 'nango-yaml/v2/nested-integrations/hubspot'), path.join(dir, 'hubspot'));
+        // await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/nested-integrations/github`, `${dir}/github`);
+        await copyDirectoryAndContents(path.join(fixturesPath, 'nango-yaml/v2/nested-integrations/github'), path.join(dir, 'github'));
+        // await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/nested-integrations/nango.yaml`, `${dir}/nango.yaml`);
+        await fs.promises.copyFile(path.join(fixturesPath, 'nango-yaml/v2/nested-integrations/nango.yaml'), path.join(dir, 'nango.yaml'));
 
         const success = await compileAllFiles({ fullPath: dir, debug: true });
 
+        //. these should report any failed paths somehow, not just true!=false
         expect(fs.existsSync(path.join(dir, 'models.ts'))).toBe(true);
         expect(fs.existsSync(path.join(dir, 'hubspot/syncs/contacts.ts'))).toBe(true);
         expect(fs.existsSync(path.join(dir, 'dist/contacts-hubspot.js'))).toBe(true);
