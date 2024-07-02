@@ -3,6 +3,9 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 
 export const copyDirectoryAndContents = async (source: string, destination: string) => {
+    // source = path.join(...source.split('/'));
+    // destination = path.join(...destination.split('/'));
+
     await fs.mkdir(destination, { recursive: true });
 
     const files = await fs.readdir(source, { withFileTypes: true });

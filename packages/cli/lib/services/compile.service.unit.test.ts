@@ -7,6 +7,11 @@ import type { NangoYamlParsed } from '@nangohq/types';
 // eg "C:\\Users\bburns\\Workspace\\forks\\nango\\packages\\cli\\lib\\services"
 const thisFolder = path.dirname(fileURLToPath(import.meta.url));
 
+// function join(...args) {
+//     args = args.map(arg => )
+//     return path.join(...args)
+// }
+
 describe('listFiles', () => {
     it('should list files with glob', () => {
         const files = listFilesToCompile({ fullPath: thisFolder, parsed: { integrations: [], models: new Map(), yamlVersion: 'v2' } });

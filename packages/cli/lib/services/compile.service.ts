@@ -68,6 +68,7 @@ export async function compileAllFiles({
     let success = true;
     for (const file of integrationFiles) {
         try {
+            // console.log('calling compile', { fullPath, file, parsed });
             const completed = await compile({ fullPath, file, parsed, compiler, debug });
             if (!completed) {
                 if (scriptName && file.inputPath.includes(scriptName)) {
@@ -270,6 +271,7 @@ export function getFileToCompile({ fullPath, filePath }: { fullPath: string; fil
     const baseName = path.basename(filePath, '.ts');
     return {
         inputPath: filePath,
+        // outputPath: path.join(fullPath, 'dist', `${baseName}.js`),
         outputPath: path.join(fullPath, `dist/${baseName}.js`),
         baseName
     };
