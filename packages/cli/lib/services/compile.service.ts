@@ -26,7 +26,11 @@ export async function compileAllFiles({
     providerConfigKey?: string;
     type?: ScriptFileType;
 }): Promise<boolean> {
-    const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
+    console.log('compileAllFiles', fullPath);
+
+    // const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
+    const tsconfig = fs.readFileSync(path.join(getNangoRootPath() || '', 'tsconfig.dev.json'), 'utf8');
+    console.log('tsconfig', tsconfig);
 
     const distDir = path.join(fullPath, 'dist');
     if (!fs.existsSync(distDir)) {
@@ -43,14 +47,14 @@ export async function compileAllFiles({
 
     const parsed = res.response!;
     const compilerOptions = (JSON.parse(tsconfig) as { compilerOptions: Record<string, any> }).compilerOptions;
+    if (debug) {
+        printDebug(`Compiler options: ${JSON.stringify(compilerOptions, null, 2)}`);
+    }
+
     const compiler = tsNode.create({
         skipProject: true, // when installed locally we don't want ts-node to pick up the package tsconfig.json file
         compilerOptions
     });
-
-    if (debug) {
-        printDebug(`Compiler options: ${JSON.stringify(compilerOptions, null, 2)}`);
-    }
 
     let scriptDirectory: string | undefined;
     if (scriptName && providerConfigKey && type) {
@@ -59,10 +63,12 @@ export async function compileAllFiles({
     }
 
     const integrationFiles = listFilesToCompile({ scriptName, fullPath, scriptDirectory, parsed, debug });
-    let success = true;
+    console.log('integrationFiles', integrationFiles);
 
+    let success = true;
     for (const file of integrationFiles) {
         try {
+            // console.log('calling compile', { fullPath, file, parsed });
             const completed = await compile({ fullPath, file, parsed, compiler, debug });
             if (!completed) {
                 if (scriptName && file.inputPath.includes(scriptName)) {
@@ -191,42 +197,50 @@ async function compile({
     compiler: tsNode.Service;
     debug: boolean;
 }): Promise<boolean> {
-    const providerConfiguration = getProviderConfigurationFromPath({ filePath: file.inputPath, parsed });
+    console.log('compile', { fullPath, file });
 
+    //. get _, eg foo.yaml?
+    const providerConfiguration = getProviderConfigurationFromPath({ filePath: file.inputPath, parsed });
     if (!providerConfiguration) {
         return false;
     }
 
+    // get _, eg 'sync', ...
     const syncConfig = [...providerConfiguration.syncs, ...providerConfiguration.actions].find((sync) => sync.name === file.baseName);
     const type = syncConfig?.type || 'sync';
 
+    //. compile any imported files?
     const success = compileImportedFile({ fullPath, filePath: file.inputPath, compiler, type, parsed });
-
     if (!success) {
         return false;
     }
 
+    //. compile ts file with tsNode ?
+    console.log('compile with tsNode...');
     compiler.compile(fs.readFileSync(file.inputPath, 'utf8'), file.inputPath);
 
+    // get output path, eg 'email-gmail-... .ts' ?
     const dirname = path.dirname(file.outputPath);
     const extname = path.extname(file.outputPath);
     const basename = path.basename(file.outputPath, extname);
-
     const fileNameWithExtension = `${basename}-${providerConfiguration.providerConfigKey}${extname}`;
     const outputPath = path.join(dirname, fileNameWithExtension);
-
     if (debug) {
         printDebug(`Compiling ${file.inputPath} -> ${outputPath}`);
     }
 
+    //. compile with tsup ? but used tsNode above?
+    console.log('calling build...');
+    // build may throw an error
     await build({
         entryPoints: [file.inputPath],
-        tsconfig: path.join(getNangoRootPath()!, 'tsconfig.dev.json'),
+        tsconfig: path.join(getNangoRootPath() || '', 'tsconfig.dev.json'),
         skipNodeModulesBundle: true,
         silent: !debug,
         outDir: path.join(fullPath, 'dist'),
         outExtension: () => ({ js: '.js' }),
         onSuccess: async () => {
+            console.log('onSuccess - file:', file);
             if (fs.existsSync(file.outputPath)) {
                 await fs.promises.rename(file.outputPath, outputPath);
                 console.log(chalk.green(`Compiled "${file.inputPath}" successfully`));
@@ -250,7 +264,8 @@ export function getFileToCompile({ fullPath, filePath }: { fullPath: string; fil
     const baseName = path.basename(filePath, '.ts');
     return {
         inputPath: filePath,
-        outputPath: path.join(fullPath, 'dist', `${baseName}.js`),
+        // outputPath: path.join(fullPath, 'dist', `${baseName}.js`),
+        outputPath: path.join(fullPath, `dist/${baseName}.js`),
         baseName
     };
 }
@@ -266,7 +281,8 @@ export function resolveTsFileLocation({
     providerConfigKey: string;
     type: ScriptFileType;
 }) {
-    const nestedPath = path.resolve(fullPath, providerConfigKey, type, `${scriptName}.ts`);
+    // const nestedPath = path.resolve(fullPath, providerConfigKey, type, `${scriptName}.ts`);
+    const nestedPath = path.resolve(fullPath, `${providerConfigKey}/${type}/${scriptName}.ts`);
     if (fs.existsSync(nestedPath)) {
         return fs.realpathSync(path.resolve(nestedPath, '../'));
     }
@@ -313,6 +329,7 @@ export function listFilesToCompile({
                 ...getMatchingFiles(fullPath, actionPath, 'ts'),
                 ...getMatchingFiles(fullPath, postConnectionPath, 'ts')
             ];
+            console.log('files', files);
 
             if (debug) {
                 if (getMatchingFiles(fullPath, syncPath, 'ts').length > 0) {
@@ -333,11 +350,41 @@ export function listFilesToCompile({
     });
 }
 
-// get array of posix file paths that match the given path parts.
+// get array of file paths that match the given path parts.
 // last part is treated as a file extension.
 // eg getMatchingFiles('foo', 'ts') -> glob.sync('foo/*.ts')
 function getMatchingFiles(...args: string[]): string[] {
     args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
-    const pattern = args.join('/');
-    return glob.sync(pattern, { posix: true });
+    console.log('args', args);
+    // const pattern = args.join('/');
+    // console.log('pattern', pattern);
+    // return glob.sync(pattern, { posix: true });
+    const pattern = path.join(...args);
+    console.log('pattern', pattern);
+
+    // windowsPathsNoEscape
+    // Use \\ as a path separator only, and never as an escape
+    // character.
+    // If set, all \\ characters are replaced with / in the
+    // pattern. Note that this makes it impossible to match
+    // against paths containing literal glob pattern characters,
+    // but allows matching with patterns constructed using
+    // path.join() and path.resolve() on Windows platforms,
+    // mimicking the (buggy!) behavior of Glob v7 and before on
+    // Windows.
+
+    // absolute
+    // Set to false to always return relative paths. When
+    // this option is not set, absolute paths are returned for
+    // patterns that are absolute, and otherwise paths are
+    // returned that are relative to the cwd setting.
+
+    // posix
+    // Return / delimited paths, even on Windows.
+    // On posix systems, this has no effect. But, on Windows, it
+    // means that paths will be / delimited, and absolute paths
+    // will be their full resolved UNC forms, eg instead of
+    // 'C:\\foo\\bar', it would return '//?/C:/foo/bar'
+
+    return glob.sync(pattern, { windowsPathsNoEscape: true, absolute: false, posix: true });
 }

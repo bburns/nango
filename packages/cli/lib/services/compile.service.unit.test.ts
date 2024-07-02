@@ -4,7 +4,13 @@ import { getFileToCompile, listFilesToCompile } from './compile.service';
 import { fileURLToPath } from 'node:url';
 import type { NangoYamlParsed } from '@nangohq/types';
 
+// eg "C:\Users\bburns\Workspace\test\various\src"
 const thisFolder = path.dirname(fileURLToPath(import.meta.url));
+
+// function join(...args) {
+//     args = args.map(arg => )
+//     return path.join(...args)
+// }
 
 describe('listFiles', () => {
     it('should list files with glob', () => {
@@ -12,8 +18,12 @@ describe('listFiles', () => {
         expect(files.length).toBeGreaterThan(1);
         expect(files[0]).toStrictEqual({
             baseName: 'verification.service',
-            inputPath: `${thisFolder}/verification.service.ts`,
-            outputPath: `${thisFolder}/dist/verification.service.js`
+            // inputPath: `${thisFolder}/verification.service.ts`,
+            // outputPath: `${thisFolder}/dist/verification.service.js`
+            // inputPath: path.join(thisFolder, 'verification.service.ts'),
+            // outputPath: path.join(thisFolder, 'dist', 'verification.service.js')
+            inputPath: path.join(thisFolder, 'verification.service.ts'),
+            outputPath: path.join(thisFolder, 'dist/verification.service.js')
         });
     });
 

@@ -54,9 +54,11 @@ export function generate({ fullPath, debug = false }: { fullPath: string; debug?
                 });
                 const stripped = rendered.replace(/^\s+/, '');
 
-                if (!fs.existsSync(`${fullPath}/${providerConfigKey}/${type}s/${name}.ts`)) {
-                    fs.mkdirSync(`${fullPath}/${providerConfigKey}/${type}s`, { recursive: true });
-                    fs.writeFileSync(`${fullPath}/${providerConfigKey}/${type}s/${name}.ts`, stripped);
+                //..............
+                // if (!fs.existsSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`)) {
+                if (!fs.existsSync(path.join(fullPath, `{providerConfigKey}/${type}s/${name}.ts`))) {
+                    fs.mkdirSync(path.join(fullPath, `${providerConfigKey}/${type}s`), { recursive: true });
+                    fs.writeFileSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`), stripped);
                     if (debug) {
                         printDebug(`Created ${name}.ts file`);
                     }
@@ -81,7 +83,7 @@ export function generate({ fullPath, debug = false }: { fullPath: string; debug?
                 process.exit(1);
             }
 
-            if (fs.existsSync(`${fullPath}/${name}.ts`) || fs.existsSync(`${fullPath}/${providerConfigKey}/${type}s/${name}.ts`)) {
+            if (fs.existsSync(path.join(fullPath, `${name}.ts`)) || fs.existsSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`))) {
                 if (debug) {
                     printDebug(`${name}.ts file already exists, so will not overwrite it.`);
                 }
@@ -119,10 +121,10 @@ export function generate({ fullPath, debug = false }: { fullPath: string; debug?
             const stripped = rendered.replace(/^\s+/, '');
 
             if (layoutMode === 'root') {
-                fs.writeFileSync(`${fullPath}/${name}.ts`, stripped);
+                fs.writeFileSync(path.join(fullPath, `${name}.ts`), stripped);
             } else {
-                fs.mkdirSync(`${fullPath}/${providerConfigKey}/${type}s`, { recursive: true });
-                fs.writeFileSync(`${fullPath}/${providerConfigKey}/${type}s/${name}.ts`, stripped);
+                fs.mkdirSync(path.join(fullPath, `${providerConfigKey}/${type}s`), { recursive: true });
+                fs.writeFileSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`), stripped);
             }
             if (debug) {
                 console.log(chalk.green(`Created ${name}.ts file`));
@@ -203,7 +205,8 @@ NANGO_DEPLOY_AUTO_CONFIRM=false # Default value`
 }
 
 export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?: boolean }) {
-    const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
+    // const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
+    const tsconfig = fs.readFileSync(path.join(getNangoRootPath()!, 'tsconfig.dev.json'), 'utf8');
     const res = loadYamlAndGenerate({ fullPath, debug });
     if (!res.success) {
         console.log(chalk.red(res.error?.message));
