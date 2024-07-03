@@ -1,5 +1,6 @@
 import { expect, describe, it, afterEach, vi } from 'vitest';
-import path from 'node:path';
+import path from 'node:path/posix';
+import { resolve } from 'node:path';
 import os from 'node:os';
 import fs from 'fs';
 import yaml from 'js-yaml';
@@ -11,9 +12,11 @@ import { getNangoRootPath } from './utils.js';
 import parserService from './services/parser.service.js';
 import { copyDirectoryAndContents, removeVersion } from './tests/helpers.js';
 import { parse } from './services/config.service.js';
+import slash from 'slash';
 
+//. on windows, want this to give a fwdslash path
 function getTestDirectory(name: string) {
-    const tmpdir = os.tmpdir();
+    const tmpdir = slash(os.tmpdir());
     const dir = path.join(tmpdir, name, 'nango-integrations');
     fs.mkdirSync(dir, { recursive: true });
     fs.rmSync(dir, { recursive: true, force: true });
@@ -31,7 +34,7 @@ describe('generate function tests', () => {
 
     it('should init the expected files in the nango-integrations directory', () => {
         const dir = getTestDirectory('init');
-        init({ absolutePath: path.resolve(dir, '..'), debug: false });
+        init({ absolutePath: resolve(dir, '..'), debug: false });
         expect(fs.existsSync(`${dir}/demo-github-integration/syncs/${exampleSyncName}.ts`)).toBe(true);
         expect(fs.existsSync(`${dir}/.env`)).toBe(true);
         expect(fs.existsSync(`${dir}/nango.yaml`)).toBe(true);
@@ -503,7 +506,7 @@ describe('generate function tests', () => {
         await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/${name}/nango.yaml`, `${dir}/nango.yaml`);
         const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
 
-        const { response } = parse(path.resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
+        const { response } = parse(resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
         expect(response?.parsed).not.toBeNull();
 
         const result = await compileSingleFile({
@@ -525,7 +528,7 @@ describe('generate function tests', () => {
         await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/${name}/nango.yaml`, `${dir}/nango.yaml`);
         const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
 
-        const { response } = parse(path.resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
+        const { response } = parse(resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
         expect(response).not.toBeNull();
 
         const result = await compileSingleFile({
@@ -548,7 +551,7 @@ describe('generate function tests', () => {
         await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/${name}/github/actions/welcomer.ts`, `${dir}/welcomer.ts`);
         const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
 
-        const { response } = parse(path.resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
+        const { response } = parse(resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
         expect(response).not.toBeNull();
 
         const result = await compileSingleFile({

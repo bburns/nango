@@ -1,7 +1,7 @@
 import fs from 'fs';
 import chalk from 'chalk';
 import promptly from 'promptly';
-import path from 'path';
+import path from 'path/posix';
 
 import { nangoConfigFile } from '@nangohq/nango-yaml';
 import { parse } from './config.service.js';

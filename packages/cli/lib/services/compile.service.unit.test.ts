@@ -1,29 +1,23 @@
-import path from 'node:path';
+import path from 'node:path/posix';
 import { describe, expect, it } from 'vitest';
 import { getFileToCompile, listFilesToCompile } from './compile.service';
 import { fileURLToPath } from 'node:url';
 import type { NangoYamlParsed } from '@nangohq/types';
+import slash from 'slash';
 
 // eg "C:\Users\bburns\Workspace\test\various\src"
-const thisFolder = path.dirname(fileURLToPath(import.meta.url));
-
-// function join(...args) {
-//     args = args.map(arg => )
-//     return path.join(...args)
-// }
+// const thisFolder = path.dirname(fileURLToPath(import.meta.url));
+const thisFolder = path.dirname(slash(fileURLToPath(import.meta.url)));
 
 describe('listFiles', () => {
     it('should list files with glob', () => {
         const files = listFilesToCompile({ fullPath: thisFolder, parsed: { integrations: [], models: new Map(), yamlVersion: 'v2' } });
         expect(files.length).toBeGreaterThan(1);
+        //. why should this be the first entry?
         expect(files[0]).toStrictEqual({
             baseName: 'verification.service',
-            // inputPath: `${thisFolder}/verification.service.ts`,
-            // outputPath: `${thisFolder}/dist/verification.service.js`
-            // inputPath: path.join(thisFolder, 'verification.service.ts'),
-            // outputPath: path.join(thisFolder, 'dist', 'verification.service.js')
-            inputPath: path.join(thisFolder, 'verification.service.ts'),
-            outputPath: path.join(thisFolder, 'dist/verification.service.js')
+            inputPath: `${thisFolder}/verification.service.ts`,
+            outputPath: `${thisFolder}/dist/verification.service.js`
         });
     });
 
