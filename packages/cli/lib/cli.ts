@@ -36,10 +36,10 @@ export const version = (debug: boolean) => {
 };
 
 export function generate({ fullPath, debug = false }: { fullPath: string; debug?: boolean }) {
-    const syncTemplateContents = fs.readFileSync(path.resolve(__dirname, './templates/sync.ejs'), 'utf8');
-    const actionTemplateContents = fs.readFileSync(path.resolve(__dirname, './templates/action.ejs'), 'utf8');
-    const githubExampleTemplateContents = fs.readFileSync(path.resolve(__dirname, './templates/github.sync.ejs'), 'utf8');
-    const postConnectionTemplateContents = fs.readFileSync(path.resolve(__dirname, './templates/post-connection.ejs'), 'utf8');
+    const syncTemplateContents = fs.readFileSync(path.join(__dirname, './templates/sync.ejs'), 'utf8');
+    const actionTemplateContents = fs.readFileSync(path.join(__dirname, './templates/action.ejs'), 'utf8');
+    const githubExampleTemplateContents = fs.readFileSync(path.join(__dirname, './templates/github.sync.ejs'), 'utf8');
+    const postConnectionTemplateContents = fs.readFileSync(path.join(__dirname, './templates/post-connection.ejs'), 'utf8');
 
     const res = loadYamlAndGenerate({ fullPath, debug });
     if (!res.success) {

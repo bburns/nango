@@ -273,13 +273,16 @@ export function getUserAgent(): string {
     return `nango-cli/${clientVersion} (${osName}/${osVersion}; node.js/${nodeVersion})`;
 }
 
-export function getNangoRootPath(debug = false) {
+//. returns a platpath - so use with path.join - wrap in slash() if needed
+export function getNangoRootPath(debug = false): string {
     const packagePath = getPackagePath(debug);
     if (!packagePath) {
         if (debug) {
             printDebug('Could not find nango cli root path locally');
         }
-        return null;
+        // return null;
+        //. or throw error?
+        return '';
     }
 
     const rootPath = path.resolve(packagePath, '..');
@@ -291,7 +294,8 @@ export function getNangoRootPath(debug = false) {
     return rootPath;
 }
 
-function getPackagePath(debug = false) {
+//. returns a platpath
+function getPackagePath(debug = false): string {
     if (process.env['CI'] || process.env['VITEST']) {
         return path.join(__dirname);
     }
