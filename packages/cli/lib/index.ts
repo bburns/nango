@@ -8,7 +8,7 @@ import { Command } from 'commander';
 import fs from 'fs';
 import chalk from 'chalk';
 import figlet from 'figlet';
-import path from 'path';
+import path from 'path/posix';
 import * as dotenv from 'dotenv';
 
 import { init, generate, tscWatch, configWatch, dockerRun, version } from './cli.js';
@@ -170,7 +170,7 @@ program
     .command('migrate-config')
     .description('Migrate the nango.yaml from v1 (deprecated) to v2')
     .action(function (this: Command) {
-        v1toV2Migration(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION));
+        v1toV2Migration(slash(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION)));
     });
 
 program
@@ -178,7 +178,7 @@ program
     .description('Migrate the script files from root level to structured directories.')
     .action(async function (this: Command) {
         const { debug } = this.opts();
-        await directoryMigration(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION), debug);
+        await directoryMigration(slash(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION)), debug);
     });
 
 // Hidden commands //

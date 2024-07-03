@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path from 'path';
+import path from 'path/posix';
 import chalk from 'chalk';
 import { exec } from 'child_process';
 

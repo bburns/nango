@@ -1,5 +1,6 @@
 import fs from 'node:fs';
-import path from 'node:path';
+// import path from 'node:path/posix';
+import path from '../ourpath.js';
 import { resolve } from 'import-meta-resolve';
 import chalk from 'chalk';
 import type { JSONSchema7 } from 'json-schema';

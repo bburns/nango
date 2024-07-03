@@ -2,8 +2,9 @@ import fs from 'fs';
 import { glob } from 'glob';
 import * as tsNode from 'ts-node';
 import chalk from 'chalk';
-import path from 'path';
+import path from 'path/posix';
 import { build } from 'tsup';
+// import slash from 'slash';
 
 import { getNangoRootPath, printDebug } from '../utils.js';
 import { loadYamlAndGenerate } from './model.service.js';
@@ -264,7 +265,6 @@ export function getFileToCompile({ fullPath, filePath }: { fullPath: string; fil
     const baseName = path.basename(filePath, '.ts');
     return {
         inputPath: filePath,
-        // outputPath: path.join(fullPath, 'dist', `${baseName}.js`),
         outputPath: path.join(fullPath, `dist/${baseName}.js`),
         baseName
     };
@@ -355,12 +355,13 @@ export function listFilesToCompile({
 // eg getMatchingFiles('foo', 'ts') -> glob.sync('foo/*.ts')
 function getMatchingFiles(...args: string[]): string[] {
     args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
-    console.log('args', args);
-    // const pattern = args.join('/');
+    // console.log('args', args);
+    const pattern = args.join('/');
     // console.log('pattern', pattern);
-    // return glob.sync(pattern, { posix: true });
-    const pattern = path.join(...args);
-    console.log('pattern', pattern);
+    return glob.sync(pattern, { posix: true });
+
+    // const pattern = path.join(...args);
+    // console.log('pattern', pattern);
 
     // windowsPathsNoEscape
     // Use \\ as a path separator only, and never as an escape
@@ -386,5 +387,5 @@ function getMatchingFiles(...args: string[]): string[] {
     // will be their full resolved UNC forms, eg instead of
     // 'C:\\foo\\bar', it would return '//?/C:/foo/bar'
 
-    return glob.sync(pattern, { windowsPathsNoEscape: true, absolute: false, posix: true });
+    // return glob.sync(pattern, { windowsPathsNoEscape: true, absolute: false, posix: true });
 }

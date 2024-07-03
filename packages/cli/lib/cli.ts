@@ -1,5 +1,10 @@
 import fs from 'node:fs';
-import path, { dirname } from 'node:path';
+
+// import path from 'node:path';
+// import { join } from 'node:path/posix';
+// import path from 'node:path/posix';
+// import { resolve } from 'node:path';
+import path from './ourpath.js';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
@@ -7,6 +12,7 @@ import ejs from 'ejs';
 import * as dotenv from 'dotenv';
 import { spawn } from 'child_process';
 import type { ChildProcess } from 'node:child_process';
+import slash from 'slash';
 
 import { NANGO_INTEGRATIONS_NAME, getNangoRootPath, getPkgVersion, printDebug } from './utils.js';
 import { loadYamlAndGenerate } from './services/model.service.js';
@@ -16,7 +22,7 @@ import { getLayoutMode } from './utils/layoutMode.js';
 import { getProviderConfigurationFromPath, nangoConfigFile } from '@nangohq/nango-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -54,9 +60,7 @@ export function generate({ fullPath, debug = false }: { fullPath: string; debug?
                 });
                 const stripped = rendered.replace(/^\s+/, '');
 
-                //..............
-                // if (!fs.existsSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`)) {
-                if (!fs.existsSync(path.join(fullPath, `{providerConfigKey}/${type}s/${name}.ts`))) {
+                if (!fs.existsSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`))) {
                     fs.mkdirSync(path.join(fullPath, `${providerConfigKey}/${type}s`), { recursive: true });
                     fs.writeFileSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`), stripped);
                     if (debug) {
@@ -205,8 +209,7 @@ NANGO_DEPLOY_AUTO_CONFIRM=false # Default value`
 }
 
 export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?: boolean }) {
-    // const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
-    const tsconfig = fs.readFileSync(path.join(getNangoRootPath()!, 'tsconfig.dev.json'), 'utf8');
+    const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
     const res = loadYamlAndGenerate({ fullPath, debug });
     if (!res.success) {
         console.log(chalk.red(res.error?.message));
@@ -241,7 +244,8 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     }
 
     watcher.on('add', async (filePath: string) => {
-        filePath = filePath.replace(/\\/g, '/');
+        // filePath = filePath.replace(/\\/g, '/');
+        filePath = slash(filePath);
         if (filePath === nangoConfigFile) {
             return;
         }
@@ -249,7 +253,8 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     });
 
     watcher.on('unlink', (filePath: string) => {
-        filePath = filePath.replace(/\\/g, '/');
+        // filePath = filePath.replace(/\\/g, '/');
+        filePath = slash(filePath);
         if (filePath === nangoConfigFile) {
             return;
         }
@@ -266,7 +271,8 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     });
 
     watcher.on('change', async (filePath: string) => {
-        filePath = filePath.replace(/\\/g, '/');
+        // filePath = filePath.replace(/\\/g, '/');
+        filePath = slash(filePath);
         if (filePath === nangoConfigFile) {
             await compileAllFiles({ fullPath, debug });
             return;

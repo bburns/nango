@@ -1,5 +1,6 @@
 import promptly from 'promptly';
 import chalk from 'chalk';
+import slash from 'slash';
 
 import type { NangoConnection } from '@nangohq/shared';
 import type { Metadata, ScriptFileType } from '@nangohq/types';
@@ -88,7 +89,7 @@ export class DryRunService {
             return;
         }
 
-        const { success, error, response } = parse(process.cwd(), debug);
+        const { success, error, response } = parse(slash(process.cwd()), debug);
         if (!success || !response?.parsed) {
             console.log(chalk.red(error?.message));
             return;
@@ -189,7 +190,7 @@ export class DryRunService {
             type = 'post-connection-scripts';
         }
 
-        const result = await compileAllFiles({ fullPath: process.cwd(), debug, scriptName: syncName, providerConfigKey, type });
+        const result = await compileAllFiles({ fullPath: slash(process.cwd()), debug, scriptName: syncName, providerConfigKey, type });
 
         if (!result) {
             console.log(chalk.red('The sync/action did not compile successfully. Exiting'));

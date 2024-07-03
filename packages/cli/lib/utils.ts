@@ -3,7 +3,8 @@ import fs from 'fs';
 import os from 'os';
 import npa from 'npm-package-arg';
 import Module from 'node:module';
-import path, { dirname } from 'path';
+// import path, { dirname } from 'path/posix';
+import path from './ourpath.js';
 import { fileURLToPath } from 'url';
 import semver from 'semver';
 import util from 'util';
@@ -14,9 +15,10 @@ import { cloudHost, stagingHost, NANGO_VERSION } from '@nangohq/shared';
 import * as dotenv from 'dotenv';
 import { state } from './state.js';
 import https from 'node:https';
+// import slash from 'slash';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const require = Module.createRequire(import.meta.url);
 
@@ -280,11 +282,13 @@ export function getNangoRootPath(debug = false) {
         return null;
     }
 
+    const rootPath = path.resolve(packagePath, '..');
+
     if (debug) {
-        printDebug(`Found the nango cli root path at ${path.resolve(packagePath, '..')}`);
+        printDebug(`Found the nango cli root path at ${rootPath}`);
     }
 
-    return path.resolve(packagePath, '..');
+    return rootPath;
 }
 
 function getPackagePath(debug = false) {

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import path from 'node:path/posix';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildModelsTS, fieldToTypescript, fieldsToTypescript, getExportToJSON } from './model.service.js';
 import type { NangoModel } from '@nangohq/types';
@@ -68,7 +69,7 @@ describe('buildModelTs', () => {
     });
 
     it('should support all advanced syntax', () => {
-        const { response } = parse(path.resolve(__dirname, `../../fixtures/nango-yaml/v2/advanced-syntax`));
+        const { response } = parse(resolve(__dirname, `../../fixtures/nango-yaml/v2/advanced-syntax`));
         const res = buildModelsTS({ parsed: response!.parsed! });
         const acc = [];
         for (const line of res.split('\n')) {
