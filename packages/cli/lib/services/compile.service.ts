@@ -2,7 +2,7 @@ import fs from 'fs';
 import { glob } from 'glob';
 import * as tsNode from 'ts-node';
 import chalk from 'chalk';
-import path from 'path';
+import path from 'path/posix';
 import { build } from 'tsup';
 import slash from 'slash';
 
@@ -271,7 +271,6 @@ export function getFileToCompile({ fullPath, filePath }: { fullPath: string; fil
     const baseName = path.basename(filePath, '.ts');
     return {
         inputPath: filePath,
-        // outputPath: path.join(fullPath, 'dist', `${baseName}.js`),
         outputPath: path.join(fullPath, `dist/${baseName}.js`),
         baseName
     };

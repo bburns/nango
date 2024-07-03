@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path from 'path';
+import path from 'path/posix';
 import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
 import chalk from 'chalk';
