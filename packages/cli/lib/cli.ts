@@ -7,7 +7,6 @@ import ejs from 'ejs';
 import * as dotenv from 'dotenv';
 import { spawn } from 'child_process';
 import type { ChildProcess } from 'node:child_process';
-import slash from 'slash';
 
 import { NANGO_INTEGRATIONS_NAME, getNangoRootPath, getPkgVersion, printDebug } from './utils.js';
 import { loadYamlAndGenerate } from './services/model.service.js';

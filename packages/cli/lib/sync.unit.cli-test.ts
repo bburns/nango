@@ -10,7 +10,7 @@ import { getNangoRootPath } from './utils.js';
 import parserService from './services/parser.service.js';
 import { copyDirectoryAndContents, removeVersion, getTestDirectory } from './tests/helpers.js';
 import { parse } from './services/config.service.js';
-import slash from 'slash';
+// import slash from 'slash';
 
 // returns a relative platform path
 function getFixturePath(s: string): string {
