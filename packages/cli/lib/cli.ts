@@ -296,7 +296,8 @@ export function configWatch({ fullPath, debug = false }: { fullPath: string; deb
 let child: ChildProcess | undefined;
 process.on('SIGINT', () => {
     if (child) {
-        const dockerDown = spawn('docker', ['compose', '-f', `${getNangoRootPath()}/docker/docker-compose.yaml`, '--project-directory', '.', 'down'], {
+        // const dockerDown = spawn('docker', ['compose', '-f', `${getNangoRootPath()}/docker/docker-compose.yaml`, '--project-directory', '.', 'down'], {
+        const dockerDown = spawn('docker', ['compose', '-f', path.join(getNangoRootPath(), 'docker/docker-compose.yaml'), '--project-directory', '.', 'down'], {
             stdio: 'inherit'
         });
         dockerDown.on('exit', () => {
@@ -315,7 +316,8 @@ process.on('SIGINT', () => {
 export const dockerRun = async (debug = false) => {
     const cwd = process.cwd();
 
-    const args = ['compose', '-f', `${getNangoRootPath()}/docker/docker-compose.yaml`, '--project-directory', '.', 'up', '--build'];
+    // const args = ['compose', '-f', `${getNangoRootPath()}/docker/docker-compose.yaml`, '--project-directory', '.', 'up', '--build'];
+    const args = ['compose', '-f', path.join(getNangoRootPath(), 'docker/docker-compose.yaml'), '--project-directory', '.', 'up', '--build'];
 
     if (debug) {
         printDebug(`Running docker with args: ${args.join(' ')}`);
