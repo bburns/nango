@@ -1,4 +1,4 @@
-import path from 'node:path/posix';
+import path from 'node:path';
 import yaml from 'js-yaml';
 import stripAnsi from 'strip-ansi';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -8,6 +8,7 @@ import { NangoError } from '@nangohq/shared';
 function cleanLog(log: any) {
     return typeof log === 'string' ? stripAnsi(log) : log;
 }
+
 describe('load', () => {
     // Not the best but until we have a logger it will work
     const consoleMock = vi.spyOn(console, 'log').mockImplementation(() => undefined);

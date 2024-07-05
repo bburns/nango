@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import path from 'node:path/posix';
+import path from 'node:path';
 import chalk from 'chalk';
 import promptly from 'promptly';
 import type { AxiosResponse } from 'axios';

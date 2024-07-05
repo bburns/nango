@@ -1,10 +1,5 @@
 import fs from 'node:fs';
-
-// import path from 'node:path';
-// import { join } from 'node:path/posix';
-// import path from 'node:path/posix';
-// import { resolve } from 'node:path';
-import path from './ourpath.js';
+import path, { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
@@ -36,10 +31,10 @@ export const version = (debug: boolean) => {
 };
 
 export function generate({ fullPath, debug = false }: { fullPath: string; debug?: boolean }) {
-    const syncTemplateContents = fs.readFileSync(path.join(__dirname, './templates/sync.ejs'), 'utf8');
-    const actionTemplateContents = fs.readFileSync(path.join(__dirname, './templates/action.ejs'), 'utf8');
-    const githubExampleTemplateContents = fs.readFileSync(path.join(__dirname, './templates/github.sync.ejs'), 'utf8');
-    const postConnectionTemplateContents = fs.readFileSync(path.join(__dirname, './templates/post-connection.ejs'), 'utf8');
+    const syncTemplateContents = fs.readFileSync(join(__dirname, './templates/sync.ejs'), 'utf8');
+    const actionTemplateContents = fs.readFileSync(join(__dirname, './templates/action.ejs'), 'utf8');
+    const githubExampleTemplateContents = fs.readFileSync(join(__dirname, './templates/github.sync.ejs'), 'utf8');
+    const postConnectionTemplateContents = fs.readFileSync(join(__dirname, './templates/post-connection.ejs'), 'utf8');
 
     const res = loadYamlAndGenerate({ fullPath, debug });
     if (!res.success) {
@@ -60,9 +55,9 @@ export function generate({ fullPath, debug = false }: { fullPath: string; debug?
                 });
                 const stripped = rendered.replace(/^\s+/, '');
 
-                if (!fs.existsSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`))) {
-                    fs.mkdirSync(path.join(fullPath, `${providerConfigKey}/${type}s`), { recursive: true });
-                    fs.writeFileSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`), stripped);
+                if (!fs.existsSync(join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`))) {
+                    fs.mkdirSync(join(fullPath, `${providerConfigKey}/${type}s`), { recursive: true });
+                    fs.writeFileSync(join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`), stripped);
                     if (debug) {
                         printDebug(`Created ${name}.ts file`);
                     }
@@ -87,7 +82,7 @@ export function generate({ fullPath, debug = false }: { fullPath: string; debug?
                 process.exit(1);
             }
 
-            if (fs.existsSync(path.join(fullPath, `${name}.ts`)) || fs.existsSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`))) {
+            if (fs.existsSync(join(fullPath, `${name}.ts`)) || fs.existsSync(join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`))) {
                 if (debug) {
                     printDebug(`${name}.ts file already exists, so will not overwrite it.`);
                 }
@@ -125,10 +120,10 @@ export function generate({ fullPath, debug = false }: { fullPath: string; debug?
             const stripped = rendered.replace(/^\s+/, '');
 
             if (layoutMode === 'root') {
-                fs.writeFileSync(path.join(fullPath, `${name}.ts`), stripped);
+                fs.writeFileSync(join(fullPath, `${name}.ts`), stripped);
             } else {
-                fs.mkdirSync(path.join(fullPath, `${providerConfigKey}/${type}s`), { recursive: true });
-                fs.writeFileSync(path.join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`), stripped);
+                fs.mkdirSync(join(fullPath, `${providerConfigKey}/${type}s`), { recursive: true });
+                fs.writeFileSync(join(fullPath, `${providerConfigKey}/${type}s/${name}.ts`), stripped);
             }
             if (debug) {
                 console.log(chalk.green(`Created ${name}.ts file`));
@@ -209,7 +204,7 @@ NANGO_DEPLOY_AUTO_CONFIRM=false # Default value`
 }
 
 export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?: boolean }) {
-    const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
+    const tsconfig = fs.readFileSync(join(getNangoRootPath(), 'tsconfig.dev.json'), 'utf8');
     const res = loadYamlAndGenerate({ fullPath, debug });
     if (!res.success) {
         console.log(chalk.red(res.error?.message));
@@ -234,7 +229,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
         }
     });
 
-    const distDir = path.join(fullPath, 'dist');
+    const distDir = join(fullPath, 'dist');
 
     if (!fs.existsSync(distDir)) {
         if (debug) {
@@ -254,7 +249,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
 
     watcher.on('unlink', (filePath: string) => {
         // filePath = filePath.replace(/\\/g, '/');
-        filePath = slash(filePath);
+        // filePath = slash(filePath);
         if (filePath === nangoConfigFile) {
             return;
         }
@@ -272,7 +267,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
 
     watcher.on('change', async (filePath: string) => {
         // filePath = filePath.replace(/\\/g, '/');
-        filePath = slash(filePath);
+        // filePath = slash(filePath);
         if (filePath === nangoConfigFile) {
             await compileAllFiles({ fullPath, debug });
             return;
@@ -282,7 +277,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
 }
 
 export function configWatch({ fullPath, debug = false }: { fullPath: string; debug?: boolean }) {
-    const watchPath = path.join(fullPath, nangoConfigFile);
+    const watchPath = join(fullPath, nangoConfigFile);
     if (debug) {
         printDebug(`Watching ${watchPath}`);
     }
@@ -296,8 +291,7 @@ export function configWatch({ fullPath, debug = false }: { fullPath: string; deb
 let child: ChildProcess | undefined;
 process.on('SIGINT', () => {
     if (child) {
-        // const dockerDown = spawn('docker', ['compose', '-f', `${getNangoRootPath()}/docker/docker-compose.yaml`, '--project-directory', '.', 'down'], {
-        const dockerDown = spawn('docker', ['compose', '-f', path.join(getNangoRootPath(), 'docker/docker-compose.yaml'), '--project-directory', '.', 'down'], {
+        const dockerDown = spawn('docker', ['compose', '-f', join(getNangoRootPath(), 'docker/docker-compose.yaml'), '--project-directory', '.', 'down'], {
             stdio: 'inherit'
         });
         dockerDown.on('exit', () => {
@@ -316,8 +310,7 @@ process.on('SIGINT', () => {
 export const dockerRun = async (debug = false) => {
     const cwd = process.cwd();
 
-    // const args = ['compose', '-f', `${getNangoRootPath()}/docker/docker-compose.yaml`, '--project-directory', '.', 'up', '--build'];
-    const args = ['compose', '-f', path.join(getNangoRootPath(), 'docker/docker-compose.yaml'), '--project-directory', '.', 'up', '--build'];
+    const args = ['compose', '-f', join(getNangoRootPath(), 'docker/docker-compose.yaml'), '--project-directory', '.', 'up', '--build'];
 
     if (debug) {
         printDebug(`Running docker with args: ${args.join(' ')}`);

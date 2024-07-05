@@ -1,10 +1,9 @@
 import axios, { AxiosError } from 'axios';
 import fs from 'fs';
 import os from 'os';
+import path from 'path';
 import npa from 'npm-package-arg';
 import Module from 'node:module';
-// import path, { dirname } from 'path/posix';
-import path from './ourpath.js';
 import { fileURLToPath } from 'url';
 import semver from 'semver';
 import util from 'util';
@@ -273,7 +272,7 @@ export function getUserAgent(): string {
     return `nango-cli/${clientVersion} (${osName}/${osVersion}; node.js/${nodeVersion})`;
 }
 
-//. returns a platpath - so use with path.join - wrap in slash() if needed
+//. returns an absolute platformpath
 export function getNangoRootPath(debug = false): string {
     const packagePath = getPackagePath(debug);
     if (!packagePath) {
@@ -294,7 +293,7 @@ export function getNangoRootPath(debug = false): string {
     return rootPath;
 }
 
-//. returns a platpath
+//. returns an absolute platformpath
 function getPackagePath(debug = false): string {
     if (process.env['CI'] || process.env['VITEST']) {
         return path.join(__dirname);

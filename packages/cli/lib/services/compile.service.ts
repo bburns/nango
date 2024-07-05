@@ -2,9 +2,9 @@ import fs from 'fs';
 import { glob } from 'glob';
 import * as tsNode from 'ts-node';
 import chalk from 'chalk';
-import path from 'path/posix';
+import path from 'path';
 import { build } from 'tsup';
-// import slash from 'slash';
+import slash from 'slash';
 
 import { getNangoRootPath, printDebug } from '../utils.js';
 import { loadYamlAndGenerate } from './model.service.js';
@@ -29,8 +29,7 @@ export async function compileAllFiles({
 }): Promise<boolean> {
     console.log('compileAllFiles', fullPath);
 
-    // const tsconfig = fs.readFileSync(`${getNangoRootPath()}/tsconfig.dev.json`, 'utf8');
-    const tsconfig = fs.readFileSync(path.join(getNangoRootPath() || '', 'tsconfig.dev.json'), 'utf8');
+    const tsconfig = fs.readFileSync(path.join(getNangoRootPath(), 'tsconfig.dev.json'), 'utf8');
     console.log('tsconfig', tsconfig);
 
     const distDir = path.join(fullPath, 'dist');
@@ -69,7 +68,6 @@ export async function compileAllFiles({
     let success = true;
     for (const file of integrationFiles) {
         try {
-            // console.log('calling compile', { fullPath, file, parsed });
             const completed = await compile({ fullPath, file, parsed, compiler, debug });
             if (!completed) {
                 if (scriptName && file.inputPath.includes(scriptName)) {
@@ -232,10 +230,13 @@ async function compile({
 
     //. compile with tsup ? but used tsNode above?
     console.log('calling build...');
+    const tsconfigPath = slash(path.join(getNangoRootPath(), 'tsconfig.dev.json'));
     // build may throw an error
     await build({
-        entryPoints: [file.inputPath],
-        tsconfig: path.join(getNangoRootPath() || '', 'tsconfig.dev.json'),
+        // entryPoints: [file.inputPath],
+        entryPoints: [slash(file.inputPath)],
+        // tsconfig: path.join(getNangoRootPath(), 'tsconfig.dev.json'),
+        tsconfig: tsconfigPath,
         skipNodeModulesBundle: true,
         silent: !debug,
         outDir: path.join(fullPath, 'dist'),
@@ -281,7 +282,6 @@ export function resolveTsFileLocation({
     providerConfigKey: string;
     type: ScriptFileType;
 }) {
-    // const nestedPath = path.resolve(fullPath, providerConfigKey, type, `${scriptName}.ts`);
     const nestedPath = path.resolve(fullPath, `${providerConfigKey}/${type}/${scriptName}.ts`);
     if (fs.existsSync(nestedPath)) {
         return fs.realpathSync(path.resolve(nestedPath, '../'));
@@ -321,25 +321,24 @@ export function listFilesToCompile({
         parsed.integrations.forEach((integration) => {
             const syncPath = `${integration.providerConfigKey}/syncs`;
             const actionPath = `${integration.providerConfigKey}/actions`;
-            const postConnectionPath = `${integration.providerConfigKey}/post-connection-scripts`;
+            const postPath = `${integration.providerConfigKey}/post-connection-scripts`;
 
-            files = [
-                ...files,
-                ...getMatchingFiles(fullPath, syncPath, 'ts'),
-                ...getMatchingFiles(fullPath, actionPath, 'ts'),
-                ...getMatchingFiles(fullPath, postConnectionPath, 'ts')
-            ];
+            const syncFiles = getMatchingFiles(fullPath, syncPath, 'ts');
+            const actionFiles = getMatchingFiles(fullPath, actionPath, 'ts');
+            const postFiles = getMatchingFiles(fullPath, postPath, 'ts');
+
+            files = [...files, ...syncFiles, ...actionFiles, ...postFiles];
             console.log('files', files);
 
             if (debug) {
-                if (getMatchingFiles(fullPath, syncPath, 'ts').length > 0) {
+                if (syncFiles.length > 0) {
                     printDebug(`Found nested sync files in ${syncPath}`);
                 }
-                if (getMatchingFiles(fullPath, actionPath, 'ts').length > 0) {
+                if (actionFiles.length > 0) {
                     printDebug(`Found nested action files in ${actionPath}`);
                 }
-                if (getMatchingFiles(fullPath, postConnectionPath, 'ts').length > 0) {
-                    printDebug(`Found nested post connection script files in ${postConnectionPath}`);
+                if (postFiles.length > 0) {
+                    printDebug(`Found nested post connection script files in ${postPath}`);
                 }
             }
         });
@@ -358,7 +357,8 @@ function getMatchingFiles(...args: string[]): string[] {
     // console.log('args', args);
     const pattern = args.join('/');
     // console.log('pattern', pattern);
-    return glob.sync(pattern, { posix: true });
+    // return glob.sync(pattern, { posix: true });
+    return glob.sync(pattern);
 
     // const pattern = path.join(...args);
     // console.log('pattern', pattern);
