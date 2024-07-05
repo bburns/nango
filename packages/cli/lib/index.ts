@@ -8,9 +8,9 @@ import { Command } from 'commander';
 import fs from 'fs';
 import chalk from 'chalk';
 import figlet from 'figlet';
-import path from 'path/posix';
+import path from 'path';
 import * as dotenv from 'dotenv';
-import slash from 'slash';
+// import slash from 'slash';
 
 import { init, generate, tscWatch, configWatch, dockerRun, version } from './cli.js';
 import deployService from './services/deploy.service.js';
@@ -89,7 +89,7 @@ program
     .description('Initialize a new Nango project')
     .action(function (this: Command) {
         const { debug } = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         init({ absolutePath: fullPath, debug });
 
         console.log(chalk.green(`Nango integrations initialized!`));
@@ -100,7 +100,7 @@ program
     .description('Generate a new Nango integration')
     .action(function (this: Command) {
         const { debug } = this.opts();
-        generate({ fullPath: slash(process.cwd()), debug });
+        generate({ fullPath: process.cwd(), debug });
     });
 
 program
@@ -141,7 +141,7 @@ program
     .option('--no-compile-interfaces', `Watch the ${nangoConfigFile} and recompile the interfaces on change`, true)
     .action(async function (this: Command) {
         const { compileInterfaces, autoConfirm, debug } = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await verificationService.necessaryFilesExist({ fullPath, autoConfirm, debug, checkDist: false });
 
         if (compileInterfaces) {
@@ -163,7 +163,7 @@ program
     .action(async function (this: Command, environment: string) {
         const options: DeployOptions = this.opts();
         const { debug } = options;
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await deployService.prep({ fullPath, options: { ...options, env: 'production' as ENV }, environment, debug });
     });
 
@@ -171,7 +171,7 @@ program
     .command('migrate-config')
     .description('Migrate the nango.yaml from v1 (deprecated) to v2')
     .action(function (this: Command) {
-        v1toV2Migration(slash(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION)));
+        v1toV2Migration(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION));
     });
 
 program
@@ -179,7 +179,7 @@ program
     .description('Migrate the script files from root level to structured directories.')
     .action(async function (this: Command) {
         const { debug } = this.opts();
-        await directoryMigration(slash(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION)), debug);
+        await directoryMigration(path.resolve(process.cwd(), NANGO_INTEGRATIONS_LOCATION), debug);
     });
 
 // Hidden commands //
@@ -194,7 +194,7 @@ program
     .option('--allow-destructive', 'Allow destructive changes to be deployed without confirmation', false)
     .action(async function (this: Command, environment: string) {
         const options: DeployOptions = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await deployService.prep({ fullPath, options: { ...options, env: 'local' }, environment, debug: options.debug });
     });
 
@@ -215,7 +215,7 @@ program
     .option('--allow-destructive', 'Allow destructive changes to be deployed without confirmation', false)
     .action(async function (this: Command, environment: string) {
         const options: DeployOptions = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await deployService.prep({ fullPath, options: { ...options, env: 'staging' }, environment, debug: options.debug });
     });
 
@@ -224,7 +224,7 @@ program
     .description('Compile the integration files to JavaScript')
     .action(async function (this: Command) {
         const { autoConfirm, debug } = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await verificationService.necessaryFilesExist({ fullPath, autoConfirm, debug, checkDist: false });
 
         const match = verificationService.filesMatchConfig({ fullPath });
@@ -245,7 +245,7 @@ program
     .option('--no-compile-interfaces', `Watch the ${nangoConfigFile} and recompile the interfaces on change`, true)
     .action(async function (this: Command) {
         const { compileInterfaces, autoConfirm, debug } = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await verificationService.necessaryFilesExist({ fullPath, autoConfirm, debug });
         if (compileInterfaces) {
             configWatch({ fullPath, debug });
@@ -269,7 +269,7 @@ program
     .description('Verify the parsed sync config and output the object for verification')
     .action(async function (this: Command) {
         const { autoConfirm } = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await verificationService.necessaryFilesExist({ fullPath, autoConfirm });
         const { success, error, response } = parse(path.resolve(fullPath, NANGO_INTEGRATIONS_LOCATION));
 
@@ -289,7 +289,7 @@ program
     .arguments('environmentName')
     .action(async function (this: Command, environmentName: string) {
         const { debug } = this.opts();
-        const fullPath = slash(process.cwd());
+        const fullPath = process.cwd();
         await deployService.admin({ fullPath, environmentName, debug });
     });
 

@@ -2,7 +2,7 @@ import fs from 'fs';
 import { glob } from 'glob';
 import * as tsNode from 'ts-node';
 import chalk from 'chalk';
-import path from 'path/posix';
+import path from 'path';
 import { build } from 'tsup';
 import slash from 'slash';
 
@@ -68,7 +68,6 @@ export async function compileAllFiles({
     let success = true;
     for (const file of integrationFiles) {
         try {
-            // console.log('calling compile', { fullPath, file, parsed });
             const completed = await compile({ fullPath, file, parsed, compiler, debug });
             if (!completed) {
                 if (scriptName && file.inputPath.includes(scriptName)) {

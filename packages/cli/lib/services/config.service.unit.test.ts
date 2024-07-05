@@ -1,4 +1,4 @@
-import path from 'node:path/posix';
+import path from 'node:path';
 import yaml from 'js-yaml';
 import stripAnsi from 'strip-ansi';
 import { afterEach, describe, expect, it, vi } from 'vitest';
