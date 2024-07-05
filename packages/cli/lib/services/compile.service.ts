@@ -262,6 +262,8 @@ export interface ListedFile {
     baseName: string;
 }
 
+// fullPath -
+// filePath - abs or relative platform path
 // inputPath - absolute platform path
 // outputPath - absolute platform path
 export function getFileToCompile({ fullPath, filePath }: { fullPath: string; filePath: string }): ListedFile {
