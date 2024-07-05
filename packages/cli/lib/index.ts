@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import path from 'path';
 import * as dotenv from 'dotenv';
+// import slash from 'slash';
 
 import { init, generate, tscWatch, configWatch, dockerRun, version } from './cli.js';
 import deployService from './services/deploy.service.js';
