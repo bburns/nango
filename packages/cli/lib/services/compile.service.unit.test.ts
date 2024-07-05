@@ -4,7 +4,7 @@ import { getFileToCompile, listFilesToCompile } from './compile.service';
 import { fileURLToPath } from 'node:url';
 import type { NangoYamlParsed } from '@nangohq/types';
 
-// eg "C:\Users\bburns\Workspace\test\various\src"
+// eg "C:\\Users\bburns\\Workspace\\forks\\nango\\packages\\cli\\lib\\services"
 const thisFolder = path.dirname(fileURLToPath(import.meta.url));
 
 describe('listFiles', () => {
@@ -14,6 +14,12 @@ describe('listFiles', () => {
         //. why should this be the first entry?
         expect(files[0]).toStrictEqual({
             baseName: 'verification.service',
+            //. but listFiles gives
+            // 'packages\\cli\\lib\\services\\verification.service.ts'
+            // why?
+            // that's relative to curdir, not fullpath
+            // oh, that's what glob does - wew
+            // path.relative(join..., '')
             inputPath: join(thisFolder, 'verification.service.ts'),
             outputPath: join(thisFolder, 'dist/verification.service.js')
         });
