@@ -7,7 +7,6 @@ import ejs from 'ejs';
 import * as dotenv from 'dotenv';
 import { spawn } from 'child_process';
 import type { ChildProcess } from 'node:child_process';
-import slash from 'slash';
 
 import { NANGO_INTEGRATIONS_NAME, getNangoRootPath, getPkgVersion, printDebug } from './utils.js';
 import { loadYamlAndGenerate } from './services/model.service.js';
@@ -238,9 +237,9 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
         fs.mkdirSync(distDir);
     }
 
+    // filePath is a relative platform path, eg '.nango\\schema.ts'
     watcher.on('add', async (filePath: string) => {
-        // filePath = filePath.replace(/\\/g, '/');
-        filePath = slash(filePath);
+        console.log('watcher add', filePath);
         if (filePath === nangoConfigFile) {
             return;
         }
@@ -248,8 +247,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     });
 
     watcher.on('unlink', (filePath: string) => {
-        // filePath = filePath.replace(/\\/g, '/');
-        // filePath = slash(filePath);
+        console.log('watcher unlink', filePath);
         if (filePath === nangoConfigFile) {
             return;
         }
@@ -266,8 +264,7 @@ export function tscWatch({ fullPath, debug = false }: { fullPath: string; debug?
     });
 
     watcher.on('change', async (filePath: string) => {
-        // filePath = filePath.replace(/\\/g, '/');
-        // filePath = slash(filePath);
+        console.log('watcher change', filePath);
         if (filePath === nangoConfigFile) {
             await compileAllFiles({ fullPath, debug });
             return;

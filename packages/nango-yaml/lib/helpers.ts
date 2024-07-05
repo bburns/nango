@@ -183,9 +183,11 @@ export function shouldQuote(name: string) {
 //     return filepath.split(path.sep);
 // }
 
+//. filePath is a platform path - relative is okay
 export function getProviderConfigurationFromPath({ filePath, parsed }: { filePath: string; parsed: NangoYamlParsed }): NangoYamlParsedIntegration | null {
-    // const pathSegments = filePath.split('/');
+    console.log('getProviderConfigurationFromPath', filePath);
     const pathSegments = filePath.split(path.sep);
+    console.log('pathSegments', pathSegments);
     const scriptType = pathSegments.length > 1 ? pathSegments[pathSegments.length - 2] : null;
     const isNested = scriptType === 'syncs' || scriptType === 'actions' || scriptType === 'post-connection-scripts';
 
