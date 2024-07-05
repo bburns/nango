@@ -1,6 +1,6 @@
+import os from 'node:os';
 import fs from 'node:fs';
-import path from 'node:path/posix';
-import { resolve } from 'node:path';
+import path, { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildModelsTS, fieldToTypescript, fieldsToTypescript, getExportToJSON } from './model.service.js';
 import type { NangoModel } from '@nangohq/types';
@@ -69,7 +69,7 @@ describe('buildModelTs', () => {
     });
 
     it('should support all advanced syntax', () => {
-        const { response } = parse(resolve(__dirname, `../../fixtures/nango-yaml/v2/advanced-syntax`));
+        const { response } = parse(path.resolve(__dirname, `../../fixtures/nango-yaml/v2/advanced-syntax`));
         const res = buildModelsTS({ parsed: response!.parsed! });
         const acc = [];
         for (const line of res.split('\n')) {
@@ -173,10 +173,12 @@ describe('fieldToTypescript', () => {
 describe('generate exports', () => {
     describe('json', () => {
         it('should export to JSON', () => {
-            const folderTS = `/tmp/cli-exports-json`;
+            // const folderTS = `/tmp/cli-exports-json`;
+            const folderTS = join(os.tmpdir(), 'cli-exports-json');
             fs.rmSync(folderTS, { recursive: true, force: true });
             fs.mkdirSync(folderTS, { recursive: true });
-            const pathTS = path.join(`/tmp/cli-exports-json`, 'schema.ts');
+            // const pathTS = path.join(`/tmp/cli-exports-json`, 'schema.ts');
+            const pathTS = join(folderTS, 'schema.ts');
             fs.writeFileSync(pathTS, `export interface Test { id: string; name: number[]; }`);
 
             const res = getExportToJSON({ pathTS });

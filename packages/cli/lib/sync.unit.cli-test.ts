@@ -1,6 +1,4 @@
 import { expect, describe, it, afterEach, vi } from 'vitest';
-// import path from 'node:path/posix';
-// import path, { join } from './ourpath.js';
 import path, { join } from 'node:path';
 import os from 'node:os';
 import fs from 'fs';
@@ -13,20 +11,24 @@ import { getNangoRootPath } from './utils.js';
 import parserService from './services/parser.service.js';
 import { copyDirectoryAndContents, removeVersion } from './tests/helpers.js';
 import { parse } from './services/config.service.js';
-// import slash from 'slash';
 
-//. this returns a platpath - ie windows or posix
+//. this returns an absolute platform path - ie windows or posix
 // eg 'C:\\Users\\bburns\\AppData\\Local\\Temp\\foo\\nango-integrations'
 function getTestDirectory(name: string): string {
     const tmpdir = os.tmpdir(); // eg 'c:\\users\\...'
-    const dir = join(tmpdir, name, 'nango-integrations'); // eg 'c:/users/...'
+    const dir = join(tmpdir, name, 'nango-integrations');
     fs.mkdirSync(dir, { recursive: true });
     fs.rmSync(dir, { recursive: true, force: true });
     return dir;
 }
 
-describe('generate function tests', () => {
+// returns a relative platform path
+function getFixturePath(s: string): string {
     const fixturesPath = './packages/cli/fixtures';
+    return join(fixturesPath, s);
+}
+
+describe('generate function tests', () => {
     // Not the best but until we have a logger it will work
     const consoleMock = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -48,7 +50,7 @@ describe('generate function tests', () => {
     it('should not overwrite existing integration files', async () => {
         const dir = getTestDirectory('overwrite');
         init({ absolutePath: dir, debug: false });
-        await fs.promises.writeFile(join(dir, '${exampleSyncName}.ts'), 'dummy fake content', 'utf8');
+        await fs.promises.writeFile(join(dir, `${exampleSyncName}.ts`), 'dummy fake content', 'utf8');
 
         const dummyContent = 'This is dummy content. Do not overwrite!';
         const exampleFilePath = join(dir, `${exampleSyncName}.ts`);
@@ -397,52 +399,52 @@ describe('generate function tests', () => {
     });
 
     it('should not complain of try catch not being awaited', () => {
-        const awaiting = parserService.callsAreUsedCorrectly(`${fixturesPath}/sync.ts`, 'sync', ['GithubIssue']);
+        const awaiting = parserService.callsAreUsedCorrectly(getFixturePath('sync.ts'), 'sync', ['GithubIssue']);
         expect(awaiting).toBe(true);
     });
 
     it('should complain when a return statement is used', () => {
-        const noReturnUsed = parserService.callsAreUsedCorrectly(`${fixturesPath}/return-sync.ts`, 'sync', ['GithubIssue']);
+        const noReturnUsed = parserService.callsAreUsedCorrectly(getFixturePath('return-sync.ts'), 'sync', ['GithubIssue']);
         expect(noReturnUsed).toBe(false);
     });
 
     it('should not complain when a return statement is used but does not return anything', () => {
-        const noReturnUsed = parserService.callsAreUsedCorrectly(`${fixturesPath}/void-return-sync.ts`, 'sync', ['GithubIssue']);
+        const noReturnUsed = parserService.callsAreUsedCorrectly(getFixturePath('void-return-sync.ts'), 'sync', ['GithubIssue']);
         expect(noReturnUsed).toBe(true);
     });
 
     it('should not complain when a return statement is used in a nested function', () => {
-        const noReturnUsed = parserService.callsAreUsedCorrectly(`${fixturesPath}/nested-return-sync.ts`, 'sync', ['GreenhouseEeoc']);
+        const noReturnUsed = parserService.callsAreUsedCorrectly(getFixturePath('nested-return-sync.ts'), 'sync', ['GreenhouseEeoc']);
         expect(noReturnUsed).toBe(true);
     });
 
     it('should complain of a non try catch not being awaited', () => {
-        const awaiting = parserService.callsAreUsedCorrectly(`${fixturesPath}/failing-sync.ts`, 'sync', ['GithubIssue']);
+        const awaiting = parserService.callsAreUsedCorrectly(getFixturePath('failing-sync.ts'), 'sync', ['GithubIssue']);
         expect(awaiting).toBe(false);
     });
 
     it('should not complain about a correct model', () => {
-        const usedCorrectly = parserService.callsAreUsedCorrectly(`${fixturesPath}/bad-model.ts`, 'sync', ['SomeBadModel']);
+        const usedCorrectly = parserService.callsAreUsedCorrectly(getFixturePath('bad-model.ts'), 'sync', ['SomeBadModel']);
         expect(usedCorrectly).toBe(true);
     });
 
     it('should not complain about awaiting when it is returned for an action', () => {
-        const awaiting = parserService.callsAreUsedCorrectly(`${fixturesPath}/no-async-return.ts`, 'action', ['SomeModel']);
+        const awaiting = parserService.callsAreUsedCorrectly(getFixturePath('no-async-return.ts'), 'action', ['SomeModel']);
         expect(awaiting).toBe(true);
     });
 
     it('should complain about an incorrect model', () => {
-        const awaiting = parserService.callsAreUsedCorrectly(`${fixturesPath}/bad-model.ts`, 'sync', ['GithubIssue']);
+        const awaiting = parserService.callsAreUsedCorrectly(getFixturePath('bad-model.ts'), 'sync', ['GithubIssue']);
         expect(awaiting).toBe(false);
     });
 
     it('should complain if retryOn is used without retries', () => {
-        const usedCorrectly = parserService.callsAreUsedCorrectly(`${fixturesPath}/retry-on-bad.ts`, 'sync', ['GithubIssue']);
+        const usedCorrectly = parserService.callsAreUsedCorrectly(getFixturePath('retry-on-bad.ts'), 'sync', ['GithubIssue']);
         expect(usedCorrectly).toBe(false);
     });
 
     it('should not complain if retryOn is used with retries', () => {
-        const usedCorrectly = parserService.callsAreUsedCorrectly(`${fixturesPath}/retry-on-good.ts`, 'sync', ['GithubIssue']);
+        const usedCorrectly = parserService.callsAreUsedCorrectly(getFixturePath('retry-on-good.ts'), 'sync', ['GithubIssue']);
         expect(usedCorrectly).toBe(false);
     });
 
@@ -450,9 +452,9 @@ describe('generate function tests', () => {
         const dir = getTestDirectory('nested');
         init({ absolutePath: dir });
 
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/nested-integrations/hubspot`, join(dir, 'hubspot'));
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/nested-integrations/github`, join(dir, 'github'));
-        await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/nested-integrations/nango.yaml`, join(dir, 'nango.yaml'));
+        await copyDirectoryAndContents(getFixturePath('nango-yaml/v2/nested-integrations/hubspot'), join(dir, 'hubspot'));
+        await copyDirectoryAndContents(getFixturePath('nango-yaml/v2/nested-integrations/github'), join(dir, 'github'));
+        await fs.promises.copyFile(getFixturePath('nango-yaml/v2/nested-integrations/nango.yaml'), join(dir, 'nango.yaml'));
 
         const success = await compileAllFiles({ fullPath: dir, debug: true });
 
@@ -469,7 +471,7 @@ describe('generate function tests', () => {
         const dir = getTestDirectory('old-directory');
         init({ absolutePath: dir });
 
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/non-nested-integrations`, dir);
+        await copyDirectoryAndContents(getFixturePath('nango-yaml/v2/non-nested-integrations'), dir);
 
         const success = await compileAllFiles({ fullPath: dir, debug: false });
 
@@ -483,8 +485,8 @@ describe('generate function tests', () => {
         const dir = getTestDirectory('relative-imports');
         init({ absolutePath: dir });
 
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/relative-imports/github`, join(dir, 'github'));
-        await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/relative-imports/nango.yaml`, join(dir, 'nango.yaml'));
+        await copyDirectoryAndContents(getFixturePath('nango-yaml/v2/relative-imports/github'), join(dir, 'github'));
+        await fs.promises.copyFile(getFixturePath('nango-yaml/v2/relative-imports/nango.yaml'), join(dir, 'nango.yaml'));
 
         const success = await compileAllFiles({ fullPath: dir, debug: false });
 
@@ -501,11 +503,11 @@ describe('generate function tests', () => {
         const dir = getTestDirectory('relative-imports-with-error');
         init({ absolutePath: dir });
 
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/${name}/github`, join(dir, 'github'));
-        await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/${name}/nango.yaml`, join(dir, 'nango.yaml'));
+        await copyDirectoryAndContents(getFixturePath(`nango-yaml/v2/${name}/github`), join(dir, 'github'));
+        await fs.promises.copyFile(getFixturePath(`nango-yaml/v2/${name}/nango.yaml`), join(dir, 'nango.yaml'));
         const tsconfig = fs.readFileSync(join(getNangoRootPath(), 'tsconfig.dev.json'), 'utf8');
 
-        const { response } = parse(path.resolve(fixturesPath, `nango-yaml/v2/${name}`));
+        const { response } = parse(path.resolve(getFixturePath(`nango-yaml/v2/${name}`)));
         expect(response?.parsed).not.toBeNull();
 
         const result = await compileSingleFile({
@@ -523,11 +525,11 @@ describe('generate function tests', () => {
         const dir = getTestDirectory('relative-imports-with-nango-misuse');
         init({ absolutePath: dir });
 
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/${name}/github`, join(dir, 'github'));
-        await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/${name}/nango.yaml`, join(dir, 'nango.yaml'));
+        await copyDirectoryAndContents(getFixturePath(`nango-yaml/v2/${name}/github`), join(dir, 'github'));
+        await fs.promises.copyFile(getFixturePath(`nango-yaml/v2/${name}/nango.yaml`), join(dir, 'nango.yaml'));
         const tsconfig = fs.readFileSync(join(getNangoRootPath(), 'tsconfig.dev.json'), 'utf8');
 
-        const { response } = parse(path.resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
+        const { response } = parse(path.resolve(getFixturePath(`nango-yaml/v2/${name}`)));
         expect(response).not.toBeNull();
 
         const result = await compileSingleFile({
@@ -545,12 +547,12 @@ describe('generate function tests', () => {
         const dir = getTestDirectory('relative-imports-with-higher-import');
         init({ absolutePath: dir });
 
-        await copyDirectoryAndContents(`${fixturesPath}/nango-yaml/v2/${name}/github`, join(dir, 'github'));
-        await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/${name}/nango.yaml`, join(dir, 'nango.yaml'));
-        await fs.promises.copyFile(`${fixturesPath}/nango-yaml/v2/${name}/github/actions/welcomer.ts`, join(dir, 'welcomer.ts'));
+        await copyDirectoryAndContents(getFixturePath(`nango-yaml/v2/${name}/github`), join(dir, 'github'));
+        await fs.promises.copyFile(getFixturePath(`nango-yaml/v2/${name}/nango.yaml`), join(dir, 'nango.yaml'));
+        await fs.promises.copyFile(getFixturePath(`nango-yaml/v2/${name}/github/actions/welcomer.ts`), join(dir, 'welcomer.ts'));
         const tsconfig = fs.readFileSync(join(getNangoRootPath(), 'tsconfig.dev.json'), 'utf8');
 
-        const { response } = parse(path.resolve(`${fixturesPath}/nango-yaml/v2/${name}`));
+        const { response } = parse(path.resolve(getFixturePath(`nango-yaml/v2/${name}`)));
         expect(response).not.toBeNull();
 
         const result = await compileSingleFile({

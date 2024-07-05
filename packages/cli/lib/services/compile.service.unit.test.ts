@@ -1,13 +1,11 @@
-import path from 'node:path/posix';
+import path, { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { getFileToCompile, listFilesToCompile } from './compile.service';
 import { fileURLToPath } from 'node:url';
 import type { NangoYamlParsed } from '@nangohq/types';
-import slash from 'slash';
 
 // eg "C:\Users\bburns\Workspace\test\various\src"
-// const thisFolder = path.dirname(fileURLToPath(import.meta.url));
-const thisFolder = path.dirname(slash(fileURLToPath(import.meta.url)));
+const thisFolder = path.dirname(fileURLToPath(import.meta.url));
 
 describe('listFiles', () => {
     it('should list files with glob', () => {
@@ -16,8 +14,8 @@ describe('listFiles', () => {
         //. why should this be the first entry?
         expect(files[0]).toStrictEqual({
             baseName: 'verification.service',
-            inputPath: `${thisFolder}/verification.service.ts`,
-            outputPath: `${thisFolder}/dist/verification.service.js`
+            inputPath: join(thisFolder, 'verification.service.ts'),
+            outputPath: join(thisFolder, 'dist/verification.service.js')
         });
     });
 
@@ -26,8 +24,8 @@ describe('listFiles', () => {
         expect(files.length).toBe(1);
         expect(files[0]).toStrictEqual({
             baseName: 'compile.service',
-            inputPath: `${thisFolder}/compile.service.ts`,
-            outputPath: `${thisFolder}/dist/compile.service.js`
+            inputPath: join(thisFolder, 'compile.service.ts'),
+            outputPath: join(thisFolder, 'dist/compile.service.js')
         });
     });
 
@@ -37,8 +35,8 @@ describe('listFiles', () => {
         expect(files.length).toBe(1);
         expect(files[0]).toStrictEqual({
             baseName: 'compile.service',
-            inputPath: `${parent}/services/compile.service.ts`,
-            outputPath: `${parent}/dist/compile.service.js`
+            inputPath: join(parent, 'services/compile.service.ts'),
+            outputPath: join(parent, 'dist/compile.service.js')
         });
     });
 
@@ -47,7 +45,7 @@ describe('listFiles', () => {
         expect(file).toStrictEqual({
             baseName: 'foobar',
             inputPath: 'foobar.ts',
-            outputPath: `${thisFolder}/dist/foobar.js`
+            outputPath: join(thisFolder, 'dist/foobar.js')
         });
     });
 });

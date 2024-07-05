@@ -1,6 +1,6 @@
 import type { LayoutMode } from '@nangohq/types';
 import fs from 'node:fs';
-import path from 'node:path/posix';
+import path from 'node:path';
 
 /*
  * Get Layout Mode

@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path from 'path/posix';
+import path from 'path';
 import chalk from 'chalk';
 import { exec } from 'child_process';
 
@@ -22,6 +22,7 @@ export const v1toV2Migration = (loadLocation: string): void => {
         return;
     }
 
+    //. fix
     exec(`node ${getNangoRootPath()}/scripts/v1-v2.js ./${nangoConfigFile}`, (error) => {
         if (error) {
             console.log(chalk.red(`There was an issue migrating your nango.yaml to v2.`));
@@ -87,7 +88,7 @@ export const directoryMigration = async (loadLocation: string, debug?: boolean):
     }
 
     for (const [providerConfigKey, integration] of Object.entries(response.parsed.integrations)) {
-        const integrationPath = `${loadLocation}/${providerConfigKey}`;
+        const integrationPath = path.join(loadLocation, providerConfigKey);
         await createDirectory(integrationPath, debug);
 
         if (integration.syncs) {

@@ -1,4 +1,4 @@
-import path from 'path/posix';
+import path from 'path';
 import fs from 'fs/promises';
 
 export const copyDirectoryAndContents = async (source: string, destination: string) => {
