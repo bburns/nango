@@ -262,6 +262,8 @@ export interface ListedFile {
     baseName: string;
 }
 
+// inputPath - absolute platform path
+// outputPath - absolute platform path
 export function getFileToCompile({ fullPath, filePath }: { fullPath: string; filePath: string }): ListedFile {
     const baseName = path.basename(filePath, '.ts');
     return {
@@ -349,43 +351,13 @@ export function listFilesToCompile({
     });
 }
 
-// get array of file paths that match the given path parts.
-// last part is treated as a file extension.
-// eg getMatchingFiles('foo', 'ts') -> glob.sync('foo/*.ts')
+// get absolute platform file paths that match the given path parts,
+// with last part treated as a file extension.
+// eg getMatchingFiles('/foo', 'bar', 'ts') -> glob.sync('/foo/bar/*.ts')
+// returns ['/foo/bar/baz.ts', '/foo/bar/pok.ts', ...]
 function getMatchingFiles(...args: string[]): string[] {
     args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
-    // console.log('args', args);
-    const pattern = args.join('/');
-    // console.log('pattern', pattern);
-    // return glob.sync(pattern, { posix: true });
-    return glob.sync(pattern);
-
-    // const pattern = path.join(...args);
-    // console.log('pattern', pattern);
-
-    // windowsPathsNoEscape
-    // Use \\ as a path separator only, and never as an escape
-    // character.
-    // If set, all \\ characters are replaced with / in the
-    // pattern. Note that this makes it impossible to match
-    // against paths containing literal glob pattern characters,
-    // but allows matching with patterns constructed using
-    // path.join() and path.resolve() on Windows platforms,
-    // mimicking the (buggy!) behavior of Glob v7 and before on
-    // Windows.
-
-    // absolute
-    // Set to false to always return relative paths. When
-    // this option is not set, absolute paths are returned for
-    // patterns that are absolute, and otherwise paths are
-    // returned that are relative to the cwd setting.
-
-    // posix
-    // Return / delimited paths, even on Windows.
-    // On posix systems, this has no effect. But, on Windows, it
-    // means that paths will be / delimited, and absolute paths
-    // will be their full resolved UNC forms, eg instead of
-    // 'C:\\foo\\bar', it would return '//?/C:/foo/bar'
-
-    // return glob.sync(pattern, { windowsPathsNoEscape: true, absolute: false, posix: true });
+    // glob prefers posix paths as input
+    const pattern = args.join('/'); // eg '/foo/bar/*.ts'
+    return glob.sync(pattern, { absolute: true });
 }
