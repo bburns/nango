@@ -174,6 +174,7 @@ function compileImportedFile({
             continue;
         }
 
+        console.log(`compile ${importedFilePathWithExtension} with ts-node`);
         compiler.compile(fs.readFileSync(importedFilePathWithExtension, 'utf8'), importedFilePathWithExtension);
         console.log(chalk.green(`Compiled "${importedFilePathWithExtension}" successfully`));
 
@@ -196,29 +197,29 @@ async function compile({
     compiler: tsNode.Service;
     debug: boolean;
 }): Promise<boolean> {
-    console.log('compile', { fullPath, file });
+    // console.log('compile', { fullPath, file });
 
-    //. get _, eg foo.yaml?
+    //. explain
     const providerConfiguration = getProviderConfigurationFromPath({ filePath: file.inputPath, parsed });
     if (!providerConfiguration) {
         return false;
     }
 
-    // get _, eg 'sync', ...
+    //. explain
     const syncConfig = [...providerConfiguration.syncs, ...providerConfiguration.actions].find((sync) => sync.name === file.baseName);
     const type = syncConfig?.type || 'sync';
 
-    //. compile any imported files?
+    //. compile any imported files
     const success = compileImportedFile({ fullPath, filePath: file.inputPath, compiler, type, parsed });
     if (!success) {
         return false;
     }
 
-    //. compile ts file with tsNode ?
-    console.log('compile with tsNode...');
+    // compile ts file with ts-node
+    console.log(`compile ${file.inputPath} with ts-node...`);
     compiler.compile(fs.readFileSync(file.inputPath, 'utf8'), file.inputPath);
 
-    // get output path, eg 'email-gmail-... .ts' ?
+    // get output path, eg '/.../dist/emails-google-mail.js'
     const dirname = path.dirname(file.outputPath);
     const extname = path.extname(file.outputPath);
     const basename = path.basename(file.outputPath, extname);
@@ -228,15 +229,11 @@ async function compile({
         printDebug(`Compiling ${file.inputPath} -> ${outputPath}`);
     }
 
-    //. compile with tsup ? but used tsNode above?
-    console.log('calling build...');
-    const tsconfigPath = slash(path.join(getNangoRootPath(), 'tsconfig.dev.json'));
-    // build may throw an error
+    // build with tsup
+    console.log(`build ${file.inputPath} with tsup`);
     await build({
-        // entryPoints: [file.inputPath],
-        entryPoints: [slash(file.inputPath)],
-        // tsconfig: path.join(getNangoRootPath(), 'tsconfig.dev.json'),
-        tsconfig: tsconfigPath,
+        entryPoints: [slash(file.inputPath)], // need posix paths
+        tsconfig: path.join(getNangoRootPath(), 'tsconfig.dev.json'),
         skipNodeModulesBundle: true,
         silent: !debug,
         outDir: path.join(fullPath, 'dist'),

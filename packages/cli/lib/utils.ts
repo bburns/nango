@@ -1,9 +1,9 @@
 import axios, { AxiosError } from 'axios';
 import fs from 'fs';
 import os from 'os';
-import path from 'path';
 import npa from 'npm-package-arg';
 import Module from 'node:module';
+import path from 'path';
 import { fileURLToPath } from 'url';
 import semver from 'semver';
 import util from 'util';
@@ -14,7 +14,6 @@ import { cloudHost, stagingHost, NANGO_VERSION } from '@nangohq/shared';
 import * as dotenv from 'dotenv';
 import { state } from './state.js';
 import https from 'node:https';
-// import slash from 'slash';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -272,18 +271,9 @@ export function getUserAgent(): string {
     return `nango-cli/${clientVersion} (${osName}/${osVersion}; node.js/${nodeVersion})`;
 }
 
-//. returns an absolute platformpath
+// get absolute platform path to nango root
 export function getNangoRootPath(debug = false): string {
-    const packagePath = getPackagePath(debug);
-    if (!packagePath) {
-        if (debug) {
-            printDebug('Could not find nango cli root path locally');
-        }
-        // return null;
-        //. or throw error?
-        return '';
-    }
-
+    const packagePath = getPackagePath(debug); // can throw error
     const rootPath = path.resolve(packagePath, '..');
 
     if (debug) {
@@ -293,7 +283,7 @@ export function getNangoRootPath(debug = false): string {
     return rootPath;
 }
 
-//. returns an absolute platformpath
+// get absolute platform path to nango package, or throw error
 function getPackagePath(debug = false): string {
     if (process.env['CI'] || process.env['VITEST']) {
         return path.join(__dirname);

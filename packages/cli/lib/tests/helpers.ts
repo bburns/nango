@@ -2,7 +2,9 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 
-export const copyDirectoryAndContents = async (source: string, destination: string) => {
+export const fixturesPath = './packages/cli/fixtures';
+
+export async function copyDirectoryAndContents(source: string, destination: string) {
     await fs.mkdir(destination, { recursive: true });
 
     const files = await fs.readdir(source, { withFileTypes: true });
@@ -17,15 +19,14 @@ export const copyDirectoryAndContents = async (source: string, destination: stri
             await fs.copyFile(sourcePath, destinationPath);
         }
     }
-};
+}
 
 export function removeVersion(res: string) {
     return res.replace(/(v[0-9.]+)/, 'vTest');
 }
 
 export async function getTestDirectory(name: string) {
-    const tmpdir = os.tmpdir();
-    const dir = path.join(tmpdir, name, 'nango-integrations');
+    const dir = path.join(os.tmpdir(), name, 'nango-integrations');
     await fs.mkdir(dir, { recursive: true });
     await fs.rm(dir, { recursive: true, force: true });
     return dir;

@@ -8,10 +8,8 @@ import { NangoError } from '../../utils/error.js';
 import { LogActionEnum } from '../../models/Telemetry.js';
 import type { LayoutMode } from '../../models/NangoConfig.js';
 import { nangoConfigFile, SYNC_FILE_EXTENSION } from '../nango-config.service.js';
-// import slash from 'slash';
 
 const __filename = fileURLToPath(import.meta.url);
-// const __filename = slash(fileURLToPath(import.meta.url));
 const __dirname = dirname(__filename);
 
 class LocalFileService {
