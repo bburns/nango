@@ -226,11 +226,10 @@ async function compile({
     const fileNameWithExtension = `${basename}-${providerConfiguration.providerConfigKey}${extname}`;
     const outputPath = path.join(dirname, fileNameWithExtension);
     if (debug) {
-        printDebug(`Compiling ${file.inputPath} -> ${outputPath}`);
+        printDebug(`Compiling ${file.inputPath} -> ${outputPath} with tsup`);
     }
 
-    // build with tsup
-    console.log(`build ${file.inputPath} with tsup`);
+    // bundle ts library with tsup, which uses esbuild
     await build({
         entryPoints: [slash(file.inputPath)], // need posix paths
         tsconfig: path.join(getNangoRootPath(), 'tsconfig.dev.json'),
@@ -239,7 +238,6 @@ async function compile({
         outDir: path.join(fullPath, 'dist'),
         outExtension: () => ({ js: '.js' }),
         onSuccess: async () => {
-            console.log('onSuccess - file:', file);
             if (fs.existsSync(file.outputPath)) {
                 await fs.promises.rename(file.outputPath, outputPath);
                 console.log(chalk.green(`Compiled "${file.inputPath}" successfully`));
@@ -259,10 +257,6 @@ export interface ListedFile {
     baseName: string;
 }
 
-// fullPath -
-// filePath - abs or relative platform path
-// inputPath - absolute platform path
-// outputPath - absolute platform path
 export function getFileToCompile({ fullPath, filePath }: { fullPath: string; filePath: string }): ListedFile {
     const baseName = path.basename(filePath, '.ts');
     return {
@@ -329,7 +323,6 @@ export function listFilesToCompile({
             const postFiles = getMatchingFiles(fullPath, postPath, 'ts');
 
             files = [...files, ...syncFiles, ...actionFiles, ...postFiles];
-            console.log('files', files);
 
             if (debug) {
                 if (syncFiles.length > 0) {
@@ -350,13 +343,13 @@ export function listFilesToCompile({
     });
 }
 
-// get absolute platform file paths that match the given path parts,
+// get file paths that match the given path parts,
 // with last part treated as a file extension.
-// eg getMatchingFiles('/foo', 'bar', 'ts') -> glob.sync('/foo/bar/*.ts')
-// returns ['/foo/bar/baz.ts', '/foo/bar/pok.ts', ...]
+// eg getMatchingFiles('bar', 'ts') -> glob.sync('bar/*.ts')
 function getMatchingFiles(...args: string[]): string[] {
     args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
-    // glob prefers posix paths as input
-    const pattern = args.join('/'); // eg '/foo/bar/*.ts'
+    // note: glob needs posix paths as input
+    //. what if first part is an absolute windows path?
+    const pattern = args.join('/'); // eg 'bar/*.ts'
     return glob.sync(pattern, { absolute: true });
 }
