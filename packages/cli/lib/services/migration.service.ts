@@ -23,7 +23,9 @@ export const v1toV2Migration = (loadLocation: string): void => {
     }
 
     //. fix
-    exec(`node ${getNangoRootPath()}/scripts/v1-v2.js ./${nangoConfigFile}`, (error) => {
+    // exec(`node ${getNangoRootPath()}/scripts/v1-v2.js ./${nangoConfigFile}`, (error) => {
+    const script = path.join(getNangoRootPath(), 'scripts/v1-v2.js');
+    exec(`node ${script} ./${nangoConfigFile}`, (error) => {
         if (error) {
             console.log(chalk.red(`There was an issue migrating your nango.yaml to v2.`));
             console.error(error);
