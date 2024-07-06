@@ -348,10 +348,7 @@ export function listFilesToCompile({
 // eg getMatchingFiles('bar', 'ts') -> glob.sync('bar/*.ts')
 function getMatchingFiles(...args: string[]): string[] {
     args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
-    // note: glob needs posix paths as input
-    //. ohhhh, but first part could be an absolute windows path
-    // so use slash on parts, or whole?
-    const pattern = args.join('/'); // eg 'bar/*.ts'
-    console.log('pattern', pattern);
-    return glob.sync(pattern, { absolute: true });
+    // note: glob needs posix paths for input, so use slash fn
+    const pattern = slash(args.join('/')); // eg 'bar/*.ts'
+    return glob.sync(pattern);
 }
