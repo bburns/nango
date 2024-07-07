@@ -4,27 +4,14 @@ import { getFileToCompile, listFilesToCompile } from './compile.service';
 import { fileURLToPath } from 'node:url';
 import type { NangoYamlParsed } from '@nangohq/types';
 
-// eg "C:\\Users\bburns\\Workspace\\forks\\nango\\packages\\cli\\lib\\services"
 const thisFolder = path.dirname(fileURLToPath(import.meta.url));
-
-// function join(...args) {
-//     args = args.map(arg => )
-//     return path.join(...args)
-// }
 
 describe('listFiles', () => {
     it('should list files with glob', () => {
         const files = listFilesToCompile({ fullPath: thisFolder, parsed: { integrations: [], models: new Map(), yamlVersion: 'v2' } });
         expect(files.length).toBeGreaterThan(1);
-        //. why should this be the first entry?
         expect(files[0]).toStrictEqual({
             baseName: 'verification.service',
-            //. but listFiles gives
-            // 'packages\\cli\\lib\\services\\verification.service.ts'
-            // why?
-            // that's relative to curdir, not fullpath
-            // oh, that's what glob does - wew
-            // path.relative(join..., '')
             inputPath: join(thisFolder, 'verification.service.ts'),
             outputPath: join(thisFolder, 'dist/verification.service.js')
         });

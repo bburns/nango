@@ -44,14 +44,15 @@ export async function compileAllFiles({
 
     const parsed = res.response!;
     const compilerOptions = (JSON.parse(tsconfig) as { compilerOptions: Record<string, any> }).compilerOptions;
-    if (debug) {
-        printDebug(`Compiler options: ${JSON.stringify(compilerOptions, null, 2)}`);
-    }
 
     const compiler = tsNode.create({
         skipProject: true, // when installed locally we don't want ts-node to pick up the package tsconfig.json file
         compilerOptions
     });
+
+    if (debug) {
+        printDebug(`Compiler options: ${JSON.stringify(compilerOptions, null, 2)}`);
+    }
 
     let scriptDirectory: string | undefined;
     if (scriptName && providerConfigKey && type) {
@@ -60,8 +61,8 @@ export async function compileAllFiles({
     }
 
     const integrationFiles = listFilesToCompile({ scriptName, fullPath, scriptDirectory, parsed, debug });
-
     let success = true;
+
     for (const file of integrationFiles) {
         try {
             const completed = await compile({ fullPath, file, parsed, compiler, debug });
@@ -332,9 +333,9 @@ export function listFilesToCompile({
 // get file paths that match the given path parts,
 // with last part treated as a file extension.
 // eg getMatchingFiles('bar', 'ts') -> glob.sync('bar/*.ts')
+// note: glob needs posix paths for input, so use slash fn
 function getMatchingFiles(...args: string[]): string[] {
     args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
-    // note: glob needs posix paths for input, so use slash fn
-    const pattern = slash(args.join('/')); // eg 'bar/*.ts'
+    const pattern = slash(args.join('/'));
     return glob.sync(pattern);
 }

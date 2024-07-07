@@ -173,11 +173,9 @@ describe('fieldToTypescript', () => {
 describe('generate exports', () => {
     describe('json', () => {
         it('should export to JSON', () => {
-            // const folderTS = `/tmp/cli-exports-json`;
             const folderTS = join(os.tmpdir(), 'cli-exports-json');
             fs.rmSync(folderTS, { recursive: true, force: true });
             fs.mkdirSync(folderTS, { recursive: true });
-            // const pathTS = path.join(`/tmp/cli-exports-json`, 'schema.ts');
             const pathTS = join(folderTS, 'schema.ts');
             fs.writeFileSync(pathTS, `export interface Test { id: string; name: number[]; }`);
 

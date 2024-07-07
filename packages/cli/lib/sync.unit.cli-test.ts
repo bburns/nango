@@ -8,7 +8,7 @@ import { exampleSyncName } from './constants.js';
 import { compileAllFiles, compileSingleFile, getFileToCompile } from './services/compile.service.js';
 import { getNangoRootPath } from './utils.js';
 import parserService from './services/parser.service.js';
-import { copyDirectoryAndContents, removeVersion, getTestDirectory, fixturesPath } from './tests/helpers.js';
+import { copyDirectoryAndContents, removeVersion, fixturesPath, getTestDirectory } from './tests/helpers.js';
 import { parse } from './services/config.service.js';
 
 describe('generate function tests', () => {
