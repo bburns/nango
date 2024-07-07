@@ -229,7 +229,8 @@ async function compile({
         printDebug(`Compiling ${file.inputPath} -> ${outputPath} with tsup`);
     }
 
-    // bundle ts library with tsup, which uses esbuild
+    // build with tsup
+    console.log(`build ${file.inputPath} with tsup`);
     await build({
         entryPoints: [slash(file.inputPath)], // need posix paths
         tsconfig: path.join(getNangoRootPath(), 'tsconfig.dev.json'),
