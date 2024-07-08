@@ -330,10 +330,12 @@ export function listFilesToCompile({
     });
 }
 
-// get file paths that match the given path parts,
-// with last part treated as a file extension.
-// eg getMatchingFiles('bar', 'ts') -> glob.sync('bar/*.ts')
-// note: glob needs posix paths for input, so use slash fn
+/**
+ * get list of file paths that match the given path parts,
+ * with last part treated as a file extension -
+ * eg getMatchingFiles('bar', 'ts') -> glob.sync('bar/*.ts')
+ * note: glob needs posix paths for input, so use slash fn.
+ */
 function getMatchingFiles(...args: string[]): string[] {
     args.splice(-1, 1, `*.${args.slice(-1)[0]}`);
     const pattern = slash(args.join('/'));
