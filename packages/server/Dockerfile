@@ -1,4 +1,4 @@
-FROM node:20.12.2-slim
+FROM node:iron-bookworm-slim
 
 ENV SERVER_RUN_MODE=DOCKERIZED
 ENV NANGO_DB_MIGRATION_FOLDER=./packages/database/lib/migrations
